@@ -1,0 +1,7 @@
+PERSON {{ name }}:
+<ng-container *ngIf="data$ | async as data">
+    <br>Name: <input [value]="data.name" />
+    <br>Full name: <input [value]="data.fullName" />
+
+    <app-client *ngFor="let clientId of data.clientIds" [id]="clientId"></app-client>
+</ng-container>

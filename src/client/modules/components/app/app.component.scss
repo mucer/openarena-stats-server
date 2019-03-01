@@ -1,0 +1,51 @@
+mat-toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.basic-container {
+    padding: 30px;    
+    position: absolute;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    overflow: auto;
+  }
+ 
+
+  table.clients {
+    td {
+        padding: 4px;
+    }
+    span.name {
+        border: 1px solid grey;
+        background-color: #f5f5f5;
+        border-radius: 3px;
+        padding: 2px;
+        margin: 2px;
+        white-space: nowrap;
+        cursor: default;
+    }
+}
+
+.mat-column-hw-id {
+    min-width: 350px;
+}
+
+.mat-column-person-name {
+    min-width: 150px;
+}
+
+nav {
+    height: 40px;
+}
+a {
+    padding: 10px;
+    background-color: lightgrey;
+    &.active {
+        background-color: lightcoral;
+    }
+}

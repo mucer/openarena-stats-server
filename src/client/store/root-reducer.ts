@@ -1,6 +1,6 @@
-import { Reducer, AnyAction } from 'redux';
+import { AnyAction, Reducer } from 'redux';
+import { ActionType, assign, ClientDto, PersonDto } from '../../shared';
 import { State } from './state';
-import { assign, ActionType, PersonDto, ClientDto } from '@shared';
 
 export const rootReducer: Reducer = (state: State, action: AnyAction): State => {
     switch (action.type) {
@@ -10,6 +10,10 @@ export const rootReducer: Reducer = (state: State, action: AnyAction): State => 
             return assign(state, { personDetail: assign(state.personDetail, { [action.payload.id]: action.payload }) });
         case ActionType.SET_CLIENTS:
             return assign(state, { clients: action.payload });
+        case ActionType.SET_MAPS:
+            return assign(state, { maps: action.payload });
+        case ActionType.SET_KILL_STATS:
+            return assign(state, { killStats: assign(state.killStats, { [action.payload.id]: action.payload.stats }) });
         case ActionType.ADD_PERSON:
             return assign(state, { persons: [...state.persons, action.payload] });
         case ActionType.ASSIGN_PERSON: {

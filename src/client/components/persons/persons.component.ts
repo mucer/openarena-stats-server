@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { PersonDto } from '@shared';
 import { Observable } from 'rxjs';
+import { PersonDto } from '../../../shared';
 import { Store } from '../../store/store';
 
 @Component({

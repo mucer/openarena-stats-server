@@ -1,9 +1,9 @@
-import { Epic, ActionsObservable, StateObservable, ofType, combineEpics } from 'redux-observable';
 import { AnyAction } from 'redux';
-import { filter, mergeMap, map, catchError, mapTo } from 'rxjs/operators';
-import { ActionType, ClientDto, PersonDto } from '@shared';
+import { ActionsObservable, combineEpics, Epic, ofType, StateObservable } from 'redux-observable';
 import { of } from 'rxjs';
-import { DataService } from './services/data.service';
+import { catchError, filter, map, mapTo, mergeMap } from 'rxjs/operators';
+import { ActionType, ClientDto, PersonDto } from '../../shared';
+import { DataService } from '../services/data.service';
 import { State } from './state';
 
 export const rootEpic = (service: DataService): Epic => combineEpics(
@@ -52,6 +52,36 @@ export const rootEpic = (service: DataService): Epic => combineEpics(
             }))
         ))
     ),
+    // LOAD_MAPS
+    (actions$: ActionsObservable<AnyAction>, state$: StateObservable<State>) => actions$.pipe(
+        ofType(ActionType.LOAD_MAPS),
+        filter(() => !state$.value.maps),
+        mergeMap(() => service.getMaps().pipe(
+            map(maps => ({
+                type: ActionType.SET_MAPS,
+                payload: maps
+            })),
+            catchError(err => of({
+                type: ActionType.ADD_ERROR,
+                payload: err
+            }))
+        ))
+    ),
+    // LOAD_KILL_STATS
+    (actions$: ActionsObservable<AnyAction>, state$: StateObservable<State>) => actions$.pipe(
+        ofType(ActionType.LOAD_KILL_STATS),
+        filter(a => !state$.value.killStats[a.payload.id]),
+        mergeMap(a => service.getKillStats(a.payload.restrictions).pipe(
+            map(stats => ({
+                type: ActionType.SET_KILL_STATS,
+                payload: { id: a.payload.id, restrictions: a.payload.restrictions, stats }
+            })),
+            catchError(err => of({
+                type: ActionType.ADD_ERROR,
+                payload: err
+            }))
+        ))
+    ),
     // ASSIGN_PERSON
     (actions$: ActionsObservable<AnyAction>, state$: StateObservable<State>) => actions$.pipe(
         ofType(ActionType.ASSIGN_PERSON),
@@ -82,7 +112,6 @@ export const rootEpic = (service: DataService): Epic => combineEpics(
                         payload: { client, person: existingPerson }
                     } as AnyAction));
             }
-
         })
     )
 );

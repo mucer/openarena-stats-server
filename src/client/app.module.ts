@@ -1,25 +1,31 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatAutocompleteModule, MatBadgeModule, MatCardModule, MatChipsModule, MatFormFieldModule, MatIconModule, MatInputModule, MatTableModule, MatToolbarModule } from '@angular/material';
+import { MatAutocompleteModule, MatBadgeModule, MatCardModule, MatChipsModule, MatFormFieldModule, MatIconModule, MatInputModule, MatPaginatorModule, MatTableModule, MatToolbarModule } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './components/app/app.component';
-import { ClientsComponent } from './components/clients/clients.component';
-import { StoreModule } from './store/store.module';
-import { SimpleCardComponent } from './components/simple-card/simple-card.component';
-import { PersonsComponent } from './components/persons/persons.component';
-import { PersonComponent } from './components/person/person.component';
 import { ClientComponent } from './components/client/client.component';
+import { ClientsComponent } from './components/clients/clients.component';
+import { KillStatsTableComponent } from './components/kill-stats-table/kill-stats-table.component';
+import { MapsComponent } from './components/maps/maps.component';
+import { PersonComponent } from './components/person/person.component';
+import { PersonsComponent } from './components/persons/persons.component';
+import { SimpleCardComponent } from './components/simple-card/simple-card.component';
+import { DurationPipe } from './pipes/duration.pipe';
+import { StoreModule } from './store/store.module';
 
 const appRoutes: Routes = [
-  { path: '',
+  {
+    path: '',
     redirectTo: '/clients',
     pathMatch: 'full'
   },
   { path: 'clients', component: ClientsComponent },
-  { path: 'persons', component: PersonsComponent }
+  { path: 'persons', component: PersonsComponent },
+  { path: 'person/:id', component: PersonComponent },
+  { path: 'maps', component: MapsComponent }
 ];
 
 @NgModule({
@@ -38,6 +44,7 @@ const appRoutes: Routes = [
     MatChipsModule,
     MatBadgeModule,
     MatCardModule,
+    MatPaginatorModule,
     StoreModule,
     RouterModule.forRoot(appRoutes)
   ],
@@ -48,7 +55,10 @@ const appRoutes: Routes = [
     SimpleCardComponent,
     PersonsComponent,
     PersonComponent,
-    ClientComponent
+    ClientComponent,
+    MapsComponent,
+    KillStatsTableComponent,
+    DurationPipe
   ],
   bootstrap: [AppComponent]
 })

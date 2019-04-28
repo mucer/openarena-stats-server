@@ -1,4 +1,4 @@
-import { GameType } from '@shared';
+import { GameType } from '../constants/game-type';
 
 export interface GameDto {
     id: number;

@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { ActionType, ClientDto, PersonDto } from '@shared';
 import { Observable } from 'rxjs';
+import { ClientDto, PersonDto } from '../../../shared';
 import { Store } from '../../store/store';
-import { setPreviousOrParentTNode } from '@angular/core/src/render3/state';
 
 @Component({
   selector: 'app-root',

@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { ActionType, ClientDto } from '@shared';
 import { Store } from '../../store/store';
 
 @Component({

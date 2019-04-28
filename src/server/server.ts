@@ -1,7 +1,7 @@
 import * as express from 'express';
 import { Pool } from 'pg';
 import { StatsDao } from './stats-dao';
-import { KillStatRestrictionsDto } from '@shared';
+import { StatRestrictionsDto } from '../shared';
 const bodyParser: any = require('body-parser');
 
 const app = express();
@@ -44,8 +44,13 @@ router.post('/clients', (req, res) => {
         client => res.send(client),
         err => res.status(500).send(err));
 });
-router.post('/stats', (req, res) => {
-    const rest: KillStatRestrictionsDto = req.body;
+router.get('/maps', (req, res) => {
+    statsDao.getMaps().then(
+        maps => res.send(maps),
+        err => res.status(500).send(err));
+});
+router.post('/kill-stats', (req, res) => {
+    const rest: StatRestrictionsDto = req.body;
     statsDao.getKillStats(rest).then(
         stats => res.send(stats),
         err => res.status(500).send(err));

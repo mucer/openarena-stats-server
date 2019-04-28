@@ -1,4 +1,4 @@
-import { assign, ClientDto, GameDto, KillStatDto, KillStatRestrictionsDto, MapDto, PersonDetailDto, PersonDto } from '@shared';
+import { assign, ClientDto, GameDto, KillStatDto, KillStatRestrictionsDto, MapDto, PersonDetailDto, PersonDto } from '../shared';
 import { Pool, PoolClient, QueryResult } from 'pg';
 
 export class StatsDao {
@@ -28,7 +28,7 @@ export class StatsDao {
 
     public async getMaps(): Promise<MapDto[]> {
         const result = await this.pool.query('SELECT map, count(*) num, sum(duration) duration '
-            + 'FROM game GROUP BY map ORDER BY 2 desc, 3 desc;');
+            + 'FROM game GROUP BY map ORDER BY 2 desc, 3 desc');
 
         return result.rows.map(r => ({
             name: r.map,
@@ -132,8 +132,9 @@ export class StatsDao {
     public async getKillStats(restrictions: KillStatRestrictionsDto): Promise<KillStatDto[]> {
         const { fromPersonId, toPersonId, cause, gameType, fromDate, toDate, map } = restrictions;
 
-        const where: string[] = [];
         const params: any[] = [];
+        const where: string[] = [];
+        const wherePlaytime: string[] = [];
 
         if (Number.isInteger(fromPersonId)) {
             params.push(fromPersonId);
@@ -160,8 +161,17 @@ export class StatsDao {
             where.push(`start_time <= $${params.length}`);
         }
         if (map) {
-            params.push(new Date(map));
+            params.push(map);
             where.push(`map = $${params.length}`);
+        }
+
+        if (fromDate) {
+            params.push(new Date(fromDate));
+            wherePlaytime.push(`to_time >= $${params.length}`);
+        }
+        if (toDate) {
+            params.push(new Date(toDate));
+            wherePlaytime.push(`from_time >= $${params.length}`);
         }
 
         const sql = `WITH
@@ -172,20 +182,28 @@ export class StatsDao {
           )
           SELECT
             p.id,
-            (select count(*) from kills k where k.from_id = p.id and k.team_kill = false) kills,
-            (select count(*) from kills k where k.from_id = p.id and k.team_kill = true) team_kills,
-            (select count(*) from kills k where k.to_id = p.id and k.team_kill = false) deaths,
-            (select count(*) from kills k where k.to_id = p.id and k.team_kill = true) team_deaths
-          FROM person p`;
+            p.name,
+            (SELECT count(*) FROM kills k WHERE k.from_id = p.id AND k.team_kill = false) kills,
+            (SELECT count(*) FROM kills k WHERE k.from_id = p.id AND k.team_kill = true) team_kills,
+            (SELECT count(*) FROM kills k WHERE k.to_id = p.id AND k.team_kill = false) deaths,
+            (SELECT count(*) FROM kills k WHERE k.to_id = p.id AND k.team_kill = true) team_deaths,
+            (SELECT sum(j.duration)
+             FROM game_join_ext j
+             WHERE j.person_id = p.id
+                   ${wherePlaytime.length > 0 ? 'AND' + wherePlaytime.join(' AND ') : ''}) duration
+          FROM person p
+          ORDER BY kills DESC, deaths DESC`;
 
         const result = await this.pool.query(sql, params);
 
         return result.rows.map(row => ({
-            personId: row.id,
-            kills: row.kills,
-            teamKills: row.team_kills,
-            deaths: row.deaths,
-            teamDeaths: row.team_deaths
+            personId: +row.id,
+            personName: row.name,
+            kills: +row.kills,
+            teamKills: +row.team_kills,
+            deaths: +row.deaths,
+            teamDeaths: +row.team_deaths,
+            duration: +row.duration
         }) as KillStatDto);
     }
 }

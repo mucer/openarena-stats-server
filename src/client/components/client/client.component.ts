@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
-import { ClientDto } from '@shared';
 import { Observable } from 'rxjs';
+import { ClientDto } from '../../../shared';
 import { Store } from '../../store/store';
 
 @Component({

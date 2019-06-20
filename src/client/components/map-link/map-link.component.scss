@@ -1,0 +1,6 @@
+@import '../../theme';
+$foreground: map-get($theme, foreground);
+a {
+    color: mat-color($foreground, text);
+    // text-decoration: none;
+}

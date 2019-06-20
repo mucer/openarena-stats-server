@@ -1,116 +1,125 @@
-import { AnyAction } from 'redux';
 import { ActionsObservable, combineEpics, Epic, ofType, StateObservable } from 'redux-observable';
-import { of } from 'rxjs';
+import { of, merge } from 'rxjs';
 import { catchError, filter, map, mapTo, mergeMap } from 'rxjs/operators';
-import { ActionType, ClientDto, PersonDto } from '../../shared';
+import { ActionType, ClientDto, PersonDto, AssignPersonAction, LoadKillStatsAction, SetKillStatsAction, AddErrorAction, PersonDetailDto, SetPersonDetailAction, SetPersonsAction, SetClientsAction, SetMapsAction, LoadPersonDetailAction, Actions } from '../../shared';
 import { DataService } from '../services/data.service';
-import { State } from './state';
+import { RootState } from './store';
 
 export const rootEpic = (service: DataService): Epic => combineEpics(
     // LOAD_PERSONS
-    (actions$: ActionsObservable<AnyAction>, state$: StateObservable<State>) => actions$.pipe(
+    (actions$: ActionsObservable<Actions>, state$: StateObservable<RootState>) => actions$.pipe(
         ofType(ActionType.LOAD_PERSONS),
-        filter(() => !state$.value.persons),
-        mergeMap(() => service.getPersons().pipe(
-            map(persons => ({
+        filter(() => !state$.value.persons.persons),
+        mergeMap(() => merge(
+            of({
                 type: ActionType.SET_PERSONS,
-                payload: persons
-            })),
-            catchError(err => of({
-                type: ActionType.ADD_ERROR,
-                payload: err
-            }))
+                persons: []
+            } as SetPersonsAction),
+            service.getPersons$().pipe(
+                map((persons: PersonDto[]) => ({
+                    type: ActionType.SET_PERSONS,
+                    persons
+                } as SetPersonsAction)),
+                catchError(error => of({
+                    type: ActionType.ADD_ERROR,
+                    error
+                } as AddErrorAction))
+            )
         ))
     ),
     // LOAD_PERSON_DETAIL
-    (actions$: ActionsObservable<AnyAction>, state$: StateObservable<State>) => actions$.pipe(
+    (actions$: ActionsObservable<Actions>, state$: StateObservable<RootState>) => actions$.pipe(
         ofType(ActionType.LOAD_PERSON_DETAIL),
-        filter(a => !state$.value.personDetail[a.payload]),
-        mergeMap(a => service.getPerson(a.payload).pipe(
-            map(data => ({
+        filter((a: LoadPersonDetailAction) => !state$.value.persons.detail[a.personId]),
+        mergeMap((a: LoadPersonDetailAction) => service.getPerson$(a.personId).pipe(
+            map((person: PersonDetailDto) => ({
                 type: ActionType.SET_PERSON_DETAIL,
-                payload: data
-            })),
-            catchError(err => of({
+                person
+            } as SetPersonDetailAction)),
+            catchError(error => of({
                 type: ActionType.ADD_ERROR,
-                payload: err
-            }))
+                error
+            } as AddErrorAction))
         ))
     ),
     // LOAD_CLIENTS
-    (actions$: ActionsObservable<AnyAction>, state$: StateObservable<State>) => actions$.pipe(
+    (actions$: ActionsObservable<Actions>, state$: StateObservable<RootState>) => actions$.pipe(
         ofType(ActionType.LOAD_CLIENTS),
-        filter(() => !state$.value.persons),
-        mergeMap(() => service.getClients().pipe(
-            map(persons => ({
+        filter(() => !state$.value.clients.clients),
+        mergeMap(() => service.getClients$().pipe(
+            map((clients: ClientDto[]) => ({
                 type: ActionType.SET_CLIENTS,
-                payload: persons
-            })),
-            catchError(err => of({
+                clients
+            } as SetClientsAction)),
+            catchError(error => of({
                 type: ActionType.ADD_ERROR,
-                payload: err
-            }))
+                error
+            } as AddErrorAction))
         ))
     ),
     // LOAD_MAPS
-    (actions$: ActionsObservable<AnyAction>, state$: StateObservable<State>) => actions$.pipe(
+    (actions$: ActionsObservable<Actions>, state$: StateObservable<RootState>) => actions$.pipe(
         ofType(ActionType.LOAD_MAPS),
-        filter(() => !state$.value.maps),
-        mergeMap(() => service.getMaps().pipe(
+        filter(() => !state$.value.maps.maps),
+        mergeMap(() => service.getMaps$().pipe(
             map(maps => ({
                 type: ActionType.SET_MAPS,
-                payload: maps
-            })),
-            catchError(err => of({
+                maps
+            } as SetMapsAction)),
+            catchError(error => of({
                 type: ActionType.ADD_ERROR,
-                payload: err
-            }))
+                error
+            } as AddErrorAction))
         ))
     ),
     // LOAD_KILL_STATS
-    (actions$: ActionsObservable<AnyAction>, state$: StateObservable<State>) => actions$.pipe(
+    (actions$: ActionsObservable<Actions>, state$: StateObservable<RootState>) => actions$.pipe(
         ofType(ActionType.LOAD_KILL_STATS),
-        filter(a => !state$.value.killStats[a.payload.id]),
-        mergeMap(a => service.getKillStats(a.payload.restrictions).pipe(
+        filter((a: LoadKillStatsAction) => !state$.value.stats.kill[a.id]),
+        mergeMap((action: LoadKillStatsAction) => service.getKillStats$(action.restrictions).pipe(
             map(stats => ({
                 type: ActionType.SET_KILL_STATS,
-                payload: { id: a.payload.id, restrictions: a.payload.restrictions, stats }
-            })),
-            catchError(err => of({
+                id: action.id,
+                restrictions: action.restrictions,
+                stats
+            } as SetKillStatsAction)),
+            catchError(error => of({
                 type: ActionType.ADD_ERROR,
-                payload: err
-            }))
+                error
+            } as AddErrorAction))
         ))
     ),
     // ASSIGN_PERSON
-    (actions$: ActionsObservable<AnyAction>, state$: StateObservable<State>) => actions$.pipe(
+    (actions$: ActionsObservable<Actions>, state$: StateObservable<RootState>) => actions$.pipe(
         ofType(ActionType.ASSIGN_PERSON),
         // ignore if person already set
-        filter(action => !action.payload.person),
-        mergeMap(action => {
-            const client: ClientDto = action.payload.client;
-            const personName: string = typeof action.payload.personName === 'string' ? (action.payload.personName as string).toUpperCase() : '';
-            const existingPerson: PersonDto | undefined = personName ? state$.value.persons.find(p => p.name === personName) : undefined;
+        filter((action: AssignPersonAction) => !action.person),
+        mergeMap((action: AssignPersonAction) => {
+            const client: ClientDto = action.client;
+            const personName: string = typeof action.personName === 'string' ? (action.personName as string).toUpperCase() : '';
+            const existingPerson: PersonDto | undefined = personName ? state$.value.persons.persons.find(p => p.name === personName) : undefined;
 
             // send assignment to backend and wait for response with person id
             if (!existingPerson) {
-                return service.addPerson(personName, undefined).pipe(
-                    mergeMap(person => service.assignPerson(client, person).pipe(
+                return service.addPerson$(personName, undefined).pipe(
+                    mergeMap(person => service.assignPerson$(client, person).pipe(
                         mapTo({
                             type: ActionType.ASSIGN_PERSON,
-                            payload: { client, person }
-                        } as AnyAction))),
-                    catchError(err => of({
+                            client,
+                            person
+                        } as AssignPersonAction))),
+                    catchError(error => of({
                         type: ActionType.ADD_ERROR,
-                        payload: err
-                    }))
+                        error
+                    } as AddErrorAction))
                 );
             } else {
-                return service.assignPerson(client, existingPerson).pipe(
+                return service.assignPerson$(client, existingPerson).pipe(
                     mapTo({
                         type: ActionType.ASSIGN_PERSON,
-                        payload: { client, person: existingPerson }
-                    } as AnyAction));
+                        client,
+                        person: existingPerson
+                    } as AssignPersonAction));
             }
         })
     )

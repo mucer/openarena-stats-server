@@ -1,5 +1,5 @@
-import { assign, ClientDto, GameDto, KillStatDto, KillStatRestrictionsDto, MapDto, PersonDetailDto, PersonDto } from '../shared';
 import { Pool, PoolClient, QueryResult } from 'pg';
+import { assign, ClientDto, GameDto, KillStatsDto, MapDto, MeanOfDeath, PersonDetailDto, PersonDto, KillStatsRestrictionsDto, WORLD_ID } from '../shared';
 
 export class StatsDao {
     constructor(private pool: Pool) {
@@ -58,17 +58,58 @@ export class StatsDao {
         if (result.rows.length === 0) {
             throw new Error(`No person for name '${id}' found!`);
         }
-        const person = result.rows[0];
+        const person: any = result.rows[0];
 
         result = await this.pool.query('SELECT id FROM client WHERE person_id = $1', [id]);
         const clientIds: number[] = result.rows.map(r => +r.id);
+
+        result = await this.pool.query(`
+            SELECT SUM(to_time - from_time) AS time
+            FROM game_join gj
+            JOIN client c ON c .id = gj.client_id
+            WHERE c.person_id = $1`, [id]);
+        const totalTime: number = +result.rows[0].time;
+
+        result = await this.pool.query(`
+            SELECT g.finished, COUNT(*) AS sum
+            FROM game g
+            JOIN game_join gj ON gj.game_id = g.id
+            JOIN client c ON gj.client_id = c.id
+            WHERE c.person_id = $1
+            GROUP BY g.finished`, [id]);
+        let unfinishedGames = 0;
+        let finishedGames = 0;
+        for (const row of result.rows) {
+            if (row.finished) {
+                finishedGames = +row.sum;
+            } else {
+                unfinishedGames = +row.sum
+            }
+        }
+
+        result = await this.pool.query(`
+            SELECT k.cause, count(*) AS num
+            FROM kill k
+            JOIN client c ON c.id = k.from_client_id
+            WHERE c.person_id = $1
+              AND k.team_kill = false
+            GROUP BY k.cause
+            ORDER BY 2 DESC`, [id]);
+        const killsWith: { cause: string, num: number }[] = result.rows.map(r => ({
+            cause: MeanOfDeath[r.cause],
+            num: +r.num
+        }));
 
         return {
             id: person.id,
             name: person.name,
             fullName: person.full_name,
-            clientIds
-        };
+            clientIds,
+            totalTime,
+            totalGames: finishedGames + unfinishedGames,
+            finishedGames,
+            killsWith
+        } as PersonDetailDto;
     }
 
     public async getClients(): Promise<ClientDto[]> {
@@ -129,7 +170,7 @@ export class StatsDao {
         }
     }
 
-    public async getKillStats(restrictions: KillStatRestrictionsDto): Promise<KillStatDto[]> {
+    public async getKillStats(restrictions: KillStatsRestrictionsDto): Promise<KillStatsDto[]> {
         const { fromPersonId, toPersonId, cause, gameType, fromDate, toDate, map } = restrictions;
 
         const params: any[] = [];
@@ -189,21 +230,58 @@ export class StatsDao {
             (SELECT count(*) FROM kills k WHERE k.to_id = p.id AND k.team_kill = true) team_deaths,
             (SELECT sum(j.duration)
              FROM game_join_ext j
-             WHERE j.person_id = p.id
+             WHERE j.person_id = p.id AND EXISTS (SELECT 1 FROM kills k WHERE k.game_id = j.game_id)
                    ${wherePlaytime.length > 0 ? 'AND' + wherePlaytime.join(' AND ') : ''}) duration
           FROM person p
           ORDER BY kills DESC, deaths DESC`;
 
         const result = await this.pool.query(sql, params);
 
-        return result.rows.map(row => ({
-            personId: +row.id,
-            personName: row.name,
-            kills: +row.kills,
-            teamKills: +row.team_kills,
-            deaths: +row.deaths,
-            teamDeaths: +row.team_deaths,
-            duration: +row.duration
-        }) as KillStatDto);
+        return result.rows
+            .filter(row =>
+                restrictions.fromPersonId === WORLD_ID ||
+                restrictions.toPersonId === WORLD_ID ||
+                +row.id === WORLD_ID ||
+                row.duration > 0)
+            .map(row => ({
+                personId: +row.id,
+                personName: row.name,
+                kills: +row.kills,
+                teamKills: +row.team_kills,
+                deaths: +row.deaths,
+                teamDeaths: +row.team_deaths,
+                duration: +row.duration
+            }) as KillStatsDto);
+    }
+
+    public async getGameStatsForPerson(personId: number): Promise<any[]> {
+        const sql = `
+            SELECT
+                g.*,
+                (SELECT COUNT(*) FROM kill_ext k WHERE k.game_id = g.id AND
+                 k.from_id = game_data.person_id AND k.team_kill = false) AS kills,
+                (SELECT COUNT(*) FROM kill_ext k WHERE k.game_id = g.id AND
+                 k.from_id = game_data.person_id AND k.team_kill = true) AS team_kills,
+                (SELECT COUNT(*) FROM kill_ext k WHERE k.game_id = g.id AND
+                 k.to_id = game_data.person_id AND k.team_kill = false) AS deaths,
+                (SELECT COUNT(*) FROM kill_ext k WHERE k.game_id = g.id AND
+                 k.to_id = game_data.person_id AND k.team_kill = true) AS team_deaths
+            FROM
+            (
+                SELECT c.person_id, g.id AS game_id, SUM(gj.to_time - gj.from_time)
+                FROM client c
+                JOIN game_join gj ON gj.client_id = c.id
+                JOIN game g ON g.id = gj.game_id
+                WHERE c.person_id = $1
+                GROUP BY c.person_id, g.id
+                ORDER BY g.start_time DESC
+            ) AS game_data
+            JOIN game g ON g.id = game_data.game_id`;
+
+        const result = await this.pool.query(sql, [personId]);
+
+        return result.rows.map(r => {
+            gameId: r.id
+        });
     }
 }

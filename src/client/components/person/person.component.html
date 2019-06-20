@@ -1,6 +1,0 @@
-<ng-container *ngIf="data$ | async as data">
-    <br>Name: <input [value]="data.name" />
-    <br>Full name: <input [value]="data.fullName" />
-
-    <app-kill-stats-table [restrictions]="{ fromPersonId: data.id, toPersonId: data.id }"></app-kill-stats-table>
-</ng-container>

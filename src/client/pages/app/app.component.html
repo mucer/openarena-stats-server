@@ -1,0 +1,10 @@
+<mat-toolbar color="primary" class="mat-elevation-z6">
+    <button mat-button routerLink="/"><mat-icon aria-hidden="true">show_chart</mat-icon> Open Arena Stats</button>
+    <button mat-button routerLink="/persons" routerLinkActive="active">Persons</button>
+    <button mat-button routerLink="/maps" routerLinkActive="active">Maps</button>
+    <button mat-button routerLink="/clients" routerLinkActive="active">Clients</button>
+</mat-toolbar>
+
+<div class="basic-container">
+    <router-outlet></router-outlet>
+</div>

@@ -1,0 +1,5 @@
+<h1>Persons</h1>
+<div class="page-wrapper">
+    <app-person-link *ngFor="let person of (persons$ | async)" [id]="person.id">
+    </app-person-link>
+</div>

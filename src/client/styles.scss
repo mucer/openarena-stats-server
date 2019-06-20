@@ -1,5 +1,31 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto');
-@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+@import 'theme';
+html,
+body {
+    height: 100%;
+}
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+h1 {
+    margin: 0;
+    color: mat-color($primary, default-contrast);
+    background-color: mat-color($primary);
+    padding: 10px 20px;
+    font-weight: normal;
+    font-size: 1.5em;
+}
+
+.page-wrapper {
+    padding: 20px 60px;
+    overflow-x: auto;
+}
+
+@media (max-width: 799px) {
+    .page-wrapper {
+        padding: 0;
+    }
+}

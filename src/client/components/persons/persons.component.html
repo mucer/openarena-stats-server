@@ -1,9 +1,0 @@
-<app-simple-card title="Persons">
-    <ul>
-        <li *ngFor="let person of (store.persons$ | async)">
-            <a [routerLink]="['/person', person.id]" routerLinkActive="active">{{ person.name }}</a>
-        </li>
-    </ul>
-    <app-person id="11">
-    </app-person>
-</app-simple-card>

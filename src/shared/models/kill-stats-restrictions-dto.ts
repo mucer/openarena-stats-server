@@ -1,7 +1,7 @@
 import { MeanOfDeath } from '../constants/mean-of-death';
 import { GameType } from '../constants/game-type';
 
-export interface StatRestrictionsDto {
+export interface KillStatsRestrictionsDto {
     fromPersonId?: number;
     toPersonId?: number;
     fromDate?: string;

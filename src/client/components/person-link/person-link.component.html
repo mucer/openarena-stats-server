@@ -1,0 +1,6 @@
+<a *ngIf="data$ | async as data" routerLink="/person/{{ data.id }}">
+    <button mat-stroked-button>
+        <mat-icon>person</mat-icon>
+         {{ data.name }}
+    </button>
+</a>

@@ -1,0 +1,9 @@
+<a *ngIf="data$ | async as data; else loading" routerLink="/game/{{ data.id }}"><button mat-stroked-button>
+        <mat-icon>play_circle_outline</mat-icon>
+        {{ data.startTime | date:'dd.MM.yy hh:mm'  }} - 
+        {{ data.type | appGameType }} -
+        {{ data.map }}
+</button></a>
+<ng-template #loading>
+    <app-loading>Loading Game</app-loading>
+</ng-template>

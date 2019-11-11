@@ -5,4 +5,6 @@ export interface GameDto {
     map: string;
     type: GameType;
     startTime: Date;
+    duration: number;
+    finished: boolean;
 }

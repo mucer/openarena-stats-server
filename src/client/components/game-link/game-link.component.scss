@@ -1,0 +1,11 @@
+@import '../../theme';
+$foreground: map-get($theme, foreground);
+div,
+button {
+    height: 30px;
+    line-height: 30px;
+}
+
+a {
+    color: mat-color($foreground, text);
+}

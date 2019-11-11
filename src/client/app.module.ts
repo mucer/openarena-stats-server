@@ -27,25 +27,30 @@ import { PersonLinkComponent } from './components/person-link/person-link.compon
 import { SimpleCardComponent } from './components/simple-card/simple-card.component';
 import { AppComponent } from './pages/app/app.component';
 import { ClientComponent } from './pages/client/client.component';
-import { ClientsComponent } from './pages/clients/clients.component';
-import { MapComponent } from './pages/map/map.component';
-import { MapsComponent } from './pages/maps/maps.component';
-import { PersonComponent } from './pages/person/person.component';
-import { PersonsComponent } from './pages/persons/persons.component';
+import { ClientsPageComponent } from './pages/clients/clients-page.component';
+import { MapPageComponent } from './pages/map/map-page.component';
+import { MapsPageComponent } from './pages/maps/maps-page.component';
+import { PersonPageComponent } from './pages/person/person-page.component';
+import { PersonsPageComponent } from './pages/persons/persons-page.component';
 import { DurationPipe } from './pipes/duration.pipe';
 import { StoreModule } from './store/store.module';
+import { StartPageComponent } from './pages/start/start-page.compenent';
+import { GameLinkComponent } from './components/game-link/game-link.component';
+import { LineChartComponent } from './components/line-chart/line-chart.component';
+import { GameTypePipe } from './pipes/game-type.pipe';
+import { AmChartsComponent } from './components/am-charts/am-charts.component';
 
 const appRoutes: Routes = [
   {
     path: '',
-    redirectTo: '/persons',
+    component: StartPageComponent,
     pathMatch: 'full'
   },
-  { path: 'clients', component: ClientsComponent },
-  { path: 'persons', component: PersonsComponent },
-  { path: 'person/:id', component: PersonComponent },
-  { path: 'maps', component: MapsComponent },
-  { path: 'map/:name', component: MapComponent }
+  { path: 'clients', component: ClientsPageComponent },
+  { path: 'persons', component: PersonsPageComponent },
+  { path: 'person/:id', component: PersonPageComponent },
+  { path: 'maps', component: MapsPageComponent },
+  { path: 'map/:name', component: MapPageComponent }
 ];
 
 @NgModule({
@@ -75,18 +80,23 @@ const appRoutes: Routes = [
   providers: [],
   declarations: [
     AppComponent,
-    ClientsComponent,
+    ClientsPageComponent,
     SimpleCardComponent,
-    PersonsComponent,
-    PersonComponent,
+    PersonsPageComponent,
+    PersonPageComponent,
     ClientComponent,
-    MapsComponent,
-    MapComponent,
+    MapsPageComponent,
+    MapPageComponent,
     KillStatsTableComponent,
     PersonLinkComponent,
+    GameLinkComponent,
     MapLinkComponent,
     DurationPipe,
-    LoadingComponent
+    GameTypePipe,
+    LoadingComponent,
+    StartPageComponent,
+    LineChartComponent,
+    AmChartsComponent
   ],
   bootstrap: [AppComponent]
 })

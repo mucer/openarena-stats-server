@@ -1,16 +1,16 @@
 import { Component } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { ClientDto, PersonDto } from 'src/shared';
-import { Store } from '../../store/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ClientDto } from 'src/shared';
+import { Store } from '../../store/store';
 
 @Component({
   selector: 'app-clients',
-  templateUrl: './clients.component.html',
-  styleUrls: ['./clients.component.scss']
+  templateUrl: './clients-page.component.html',
+  styleUrls: ['./clients-page.component.scss']
 })
-export class ClientsComponent {
+export class ClientsPageComponent {
   public myControl = new FormControl();
 
   public clients$: Observable<ClientDto[] | undefined>;
@@ -26,5 +26,9 @@ export class ClientsComponent {
 
   public assignPerson(client: ClientDto, personName: string) {
     this.store.assignPerson(client, personName);
+  }
+
+  public refreshMaterializedViews(): void {
+    this.store.refreshMaterializedViews();
   }
 }

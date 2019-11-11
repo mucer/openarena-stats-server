@@ -1,7 +1,7 @@
 import { ActionsObservable, combineEpics, Epic, ofType, StateObservable } from 'redux-observable';
 import { of, merge } from 'rxjs';
 import { catchError, filter, map, mapTo, mergeMap } from 'rxjs/operators';
-import { ActionType, ClientDto, PersonDto, AssignPersonAction, LoadKillStatsAction, SetKillStatsAction, AddErrorAction, PersonDetailDto, SetPersonDetailAction, SetPersonsAction, SetClientsAction, SetMapsAction, LoadPersonDetailAction, Actions } from '../../shared';
+import { ActionType, ClientDto, PersonDto, AssignPersonAction, LoadKillStatsAction, SetKillStatsAction, AddErrorAction, PersonDetailDto, SetPersonDetailAction, SetPersonsAction, SetClientsAction, SetMapsAction, LoadPersonDetailAction, Actions, LoadGameAction, GameDto, SetGameAction, LoadGamePersonStatsAction, SetGamePersonStatsAction, RefreshMaterializedViewsAction, MaterializedViewsRefreshedAction } from '../../shared';
 import { DataService } from '../services/data.service';
 import { RootState } from './store';
 
@@ -36,6 +36,21 @@ export const rootEpic = (service: DataService): Epic => combineEpics(
                 type: ActionType.SET_PERSON_DETAIL,
                 person
             } as SetPersonDetailAction)),
+            catchError(error => of({
+                type: ActionType.ADD_ERROR,
+                error
+            } as AddErrorAction))
+        ))
+    ),
+    // LOAD_GAME
+    (actions$: ActionsObservable<Actions>, state$: StateObservable<RootState>) => actions$.pipe(
+        ofType(ActionType.LOAD_GAME),
+        filter((a: LoadGameAction) => !state$.value.games.games[a.gameId]),
+        mergeMap((a: LoadGameAction) => service.getGame$(a.gameId).pipe(
+            map((game: GameDto) => ({
+                type: ActionType.SET_GAME,
+                game
+            } as SetGameAction)),
             catchError(error => of({
                 type: ActionType.ADD_ERROR,
                 error
@@ -89,6 +104,22 @@ export const rootEpic = (service: DataService): Epic => combineEpics(
             } as AddErrorAction))
         ))
     ),
+    // LOAD_GAME_PERSON_STATS
+    (actions$: ActionsObservable<Actions>, state$: StateObservable<RootState>) => actions$.pipe(
+        ofType(ActionType.LOAD_GAME_PERSON_STATS),
+        filter((a: LoadGamePersonStatsAction) => !state$.value.stats.gamePerson[a.id]),
+        mergeMap((action: LoadGamePersonStatsAction) => service.getGamePersonStats$(action.restrictions).pipe(
+            map(stats => ({
+                type: ActionType.SET_GAME_PERSON_STATS,
+                id: action.id,
+                stats
+            } as SetGamePersonStatsAction)),
+            catchError(error => of({
+                type: ActionType.ADD_ERROR,
+                error
+            } as AddErrorAction))
+        ))
+    ),
     // ASSIGN_PERSON
     (actions$: ActionsObservable<Actions>, state$: StateObservable<RootState>) => actions$.pipe(
         ofType(ActionType.ASSIGN_PERSON),
@@ -122,5 +153,18 @@ export const rootEpic = (service: DataService): Epic => combineEpics(
                     } as AssignPersonAction));
             }
         })
+    ),
+    // REFRESH_MATERIALIZED_VIEWS
+    (actions$: ActionsObservable<Actions>, state$: StateObservable<RootState>) => actions$.pipe(
+        ofType(ActionType.REFRESH_MATERIALIZED_VIEWS),
+        mergeMap((a: RefreshMaterializedViewsAction) => service.refreshMaterializedViews$().pipe(
+            map(() => ({
+                type: ActionType.MATERIALIZED_VIEWS_REFRESHED
+            } as MaterializedViewsRefreshedAction)),
+            catchError(error => of({
+                type: ActionType.ADD_ERROR,
+                error
+            } as AddErrorAction))
+        ))
     )
 );

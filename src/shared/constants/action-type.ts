@@ -1,10 +1,12 @@
 import { Action } from 'redux';
 import { ClientDto } from '../models/client-dto';
-import { KillStatsRestrictionsDto } from '../models/kill-stats-restrictions-dto';
+import { KillStatsRestrictions, GamePersonStatsRestrictions } from '../models/restrictions';
 import { KillStatsDto } from '../models/kill-stats-dto';
 import { PersonDetailDto } from '../models/person-detail-dto';
 import { MapDto } from '../models/map-dto';
 import { PersonDto } from '../models/person-dto';
+import { GameDto } from '../models/game-dto';
+import { GamePersonStatsDto } from '../models/game-person-stats-dto';
 
 export enum ActionType {
     ADD_ERROR = 'ADD_ERROR',
@@ -19,7 +21,13 @@ export enum ActionType {
     SET_KILL_STATS = 'SET_KILL_STATS',
     SET_MAPS = 'SET_MAPS',
     SET_PERSON_DETAIL = 'SET_PERSON_DETAIL',
-    SET_PERSONS = 'SET_PERSONS'
+    SET_PERSONS = 'SET_PERSONS',
+    LOAD_GAME = 'LOAD_GAME',
+    SET_GAME = 'SET_GAME',
+    LOAD_GAME_PERSON_STATS = 'LOAD_GAME_PERSON_STATS',
+    SET_GAME_PERSON_STATS = 'SET_GAME_PERSON_STATS',
+    REFRESH_MATERIALIZED_VIEWS = 'REFRESH_MATERIALIZED_VIEWS',
+    MATERIALIZED_VIEWS_REFRESHED = 'MATERIALIZED_VIEWS_REFRESHED'
 }
 
 
@@ -60,13 +68,12 @@ export interface LoadPersonsAction extends Action {
 export interface LoadKillStatsAction extends Action {
     type: ActionType.LOAD_KILL_STATS;
     id: string;
-    restrictions: KillStatsRestrictionsDto;
+    restrictions: KillStatsRestrictions;
 }
 
 export interface SetKillStatsAction extends Action {
     type: ActionType.SET_KILL_STATS;
     id: string;
-    restrictions: KillStatsRestrictionsDto;
     stats: KillStatsDto[];
 }
 
@@ -90,6 +97,36 @@ export interface SetPersonsAction extends Action {
     persons: PersonDetailDto[];
 }
 
+export interface LoadGameAction extends Action {
+    type: ActionType.LOAD_GAME;
+    gameId: number;
+}
+
+export interface SetGameAction extends Action {
+    type: ActionType.SET_GAME;
+    game: GameDto;
+}
+
+export interface LoadGamePersonStatsAction extends Action {
+    type: ActionType.LOAD_GAME_PERSON_STATS;
+    id: string;
+    restrictions: GamePersonStatsRestrictions;
+}
+
+export interface SetGamePersonStatsAction extends Action {
+    type: ActionType.SET_GAME_PERSON_STATS;
+    id: string;
+    stats: GamePersonStatsDto[];
+}
+
+export interface RefreshMaterializedViewsAction extends Action {
+    type: ActionType.REFRESH_MATERIALIZED_VIEWS;
+}
+
+export interface MaterializedViewsRefreshedAction extends Action {
+    type: ActionType.MATERIALIZED_VIEWS_REFRESHED;
+}
+
 export type Actions = AddErrorAction
     | AddPerson
     | AssignPersonAction
@@ -102,4 +139,10 @@ export type Actions = AddErrorAction
     | SetClientsAction
     | SetMapsAction
     | SetPersonDetailAction
-    | SetPersonsAction;
+    | SetPersonsAction
+    | LoadGameAction
+    | SetGameAction
+    | LoadGamePersonStatsAction
+    | SetGamePersonStatsAction
+    | RefreshMaterializedViewsAction
+    | MaterializedViewsRefreshedAction;

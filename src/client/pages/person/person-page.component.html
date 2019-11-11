@@ -1,0 +1,52 @@
+<ng-container *ngIf="data$ | async as data">
+    <h1>
+        <mat-icon>person</mat-icon>
+        {{ data.name }}
+    </h1>
+
+
+    <div class="page-wrapper">
+
+        <p>Total Playtime: {{ data.totalTime | appDuration }}</p>
+        <p>Numer of games: {{ data.totalGames }} total, {{ data.finishedGames}} completed, X wins, X losses</p>
+        <p>Game types: CTF X, F1CTF X, DM X, TDM X</p>
+        <p>Favorite weapon: {{ data.favWeapon?.name }} ({{ data.favWeapon?.kills }} kills)</p>
+        <p>Best Map:
+            <app-map-link name="am_thornish"></app-map-link> (3 wins, 0 losses)
+        </p>
+
+
+        <div>
+            <h2>Last games</h2>
+            <app-line-chart [data]="gameStats$ | async"></app-line-chart>
+            <app-am-charts [data]="gameStats$ | async"></app-am-charts>
+
+            <table class="games">
+                <tr>
+                    <th>Game</th>
+                    <th>Award Points</th>
+                    <th>Kill Points</th>
+                    <th>Seconds</th>
+                    <th>Kills</th>
+                    <th>Deaths</th>
+                </tr>
+                <tr *ngFor="let stats of gameStats$ | async">
+                    <td>
+                        <app-game-link [id]="stats.game.id"></app-game-link>
+                    </td>
+                    <td>{{ stats.awardPoints }}</td>
+                    <td>{{ stats.killPoints }}</td>
+                    <td>{{ stats.seconds }}</td>
+                    <td>{{ stats.kills }} </td>
+                    <td>{{ stats.deaths + stats.teamDeaths }} </td>
+                </tr>
+            </table>
+        </div>
+
+        <h2>Kill stats</h2>
+        <div class="mat-elevation-z1">
+            <app-kill-stats-table [restrictions]="{ fromPersonId: data.id, toPersonId: data.id }">
+            </app-kill-stats-table>
+        </div>
+    </div>
+</ng-container>

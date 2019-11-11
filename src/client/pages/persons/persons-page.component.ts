@@ -5,10 +5,10 @@ import { Store } from '../../store/store';
 import { map } from 'rxjs/operators';
 
 @Component({
-    templateUrl: './persons.component.html',
-    styleUrls: ['./persons.component.scss']
+    templateUrl: './persons-page.component.html',
+    styleUrls: ['./persons-page.component.scss']
 })
-export class PersonsComponent {
+export class PersonsPageComponent {
   public persons$: Observable<PersonDto[] | undefined>;
 
     constructor(public store: Store) {

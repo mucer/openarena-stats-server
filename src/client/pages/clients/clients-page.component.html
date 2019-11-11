@@ -1,10 +1,21 @@
 <mat-autocomplete #auto="matAutocomplete">
     <mat-option *ngFor="let person of (personNames$ | async)" [value]="person">{{ person }}</mat-option>
 </mat-autocomplete>
+<mat-menu #extras="matMenu">
+    <button mat-menu-item (click)="refreshMaterializedViews()">
+        <mat-icon>refresh</mat-icon>
+        <span>Refresh Materialized Views</span>
+    </button>
+</mat-menu>
 
 
-<h1>Clients</h1>
-
+<h1>
+    Clients
+    <div class="spacer"></div>
+    <button mat-icon-button [matMenuTriggerFor]="extras" aria-label="Extras">
+        <mat-icon>more_vert</mat-icon>
+    </button>
+</h1>
 
 <div class="page-wrapper">
     <div class="mat-elevation-z1">

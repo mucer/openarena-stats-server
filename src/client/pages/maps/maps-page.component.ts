@@ -6,10 +6,10 @@ import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Component({
-    templateUrl: './maps.component.html',
-    styleUrls: ['./maps.component.scss']
+    templateUrl: './maps-page.component.html',
+    styleUrls: ['./maps-page.component.scss']
 })
-export class MapsComponent {
+export class MapsPageComponent {
     public pageSize = 10;
     public pageSizeOptions: number[] = [5, 10, 25, 100];
     public pageEvent: PageEvent;

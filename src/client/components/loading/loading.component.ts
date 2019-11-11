@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
     selector: 'app-loading',
@@ -10,8 +10,8 @@ import { Component, Input } from '@angular/core';
     <ng-content></ng-content>
     `,
     styles: [`:host {
-        display: block;
-        padding: 10px;
+        display: flex;
+        flex-flow: row nowrap;
     }
 
     .spinner {

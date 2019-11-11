@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { MeanOfDeath, PersonDetailDto } from '../../../shared';
-import { Store } from '../../store/store';
 import { filter, map } from 'rxjs/operators';
+import { GamePersonStatsDto, MeanOfDeath, PersonDetailDto } from '../../../shared';
+import { Store } from '../../store/store';
 
 interface Details extends PersonDetailDto {
     favWeapon?: { name: string, kills: number };
@@ -11,17 +11,21 @@ interface Details extends PersonDetailDto {
 
 @Component({
     selector: 'app-person',
-    templateUrl: './person.component.html'
+    templateUrl: 'person-page.component.html',
+    styleUrls: [ 'person-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PersonComponent implements OnInit {
+export class PersonPageComponent implements OnInit {
     public data$: Observable<Details>;
+
+    public gameStats$: Observable<GamePersonStatsDto[]>;
 
     constructor(private store: Store, private route: ActivatedRoute) {
     }
 
     public ngOnInit() {
         this.route.params.subscribe(params => {
-            this.data$ = this.store.getPersonDetail$(params.id).pipe(filter(Boolean), map((person: PersonDetailDto) => {
+            this.data$ = this.store.getPersonDetail$(+params.id).pipe(filter(Boolean), map((person: PersonDetailDto) => {
                 const killsWith: number[] = [];
                 let favWeapon: { name: string, kills: number } | undefined;
 
@@ -35,6 +39,10 @@ export class PersonComponent implements OnInit {
 
                 return { ...person, favWeapon };
             }));
+            this.gameStats$ = this.store.getGamePersonStats$({
+                personId: +params.id,
+                limit: 30
+            });
         });
     }
 }

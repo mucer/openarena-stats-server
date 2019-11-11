@@ -6,9 +6,9 @@ import { Store } from '../../store/store';
 
 @Component({
     selector: 'app-map',
-    templateUrl: './map.component.html'
+    templateUrl: './map-page.component.html'
 })
-export class MapComponent implements OnInit {
+export class MapPageComponent implements OnInit {
     public data$: Observable<MapDto | undefined> | undefined;
 
     constructor(private store: Store, private route: ActivatedRoute) {
